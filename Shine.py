@@ -69,6 +69,9 @@ with tab2:
     potency_df = pd.DataFrame(potency_data)
     potency_chart_df = pd.DataFrame(potency_chart_data)
 
+    # Convert chart data to numeric, setting invalid values to None
+    potency_chart_df["Percentage (% w/w)"] = pd.to_numeric(potency_chart_df["Percentage (% w/w)"], errors='coerce')
+
     # Interactive Line Chart for Potency Results
     st.write("### Potency Analysis Chart")
     fig = px.line(potency_chart_df, x="Analyte", y="Percentage (% w/w)", title="Potency Analysis", markers=True)
@@ -106,6 +109,9 @@ with tab3:
     terpene_df = pd.DataFrame(terpene_data)
     terpene_chart_df = pd.DataFrame(terpene_chart_data)
 
+    # Convert chart data to numeric, setting invalid values to None
+    terpene_chart_df["Result (% w/w)"] = pd.to_numeric(terpene_chart_df["Result (% w/w)"], errors='coerce')
+
     # Interactive Line Chart for Terpenes
     st.write("### Terpene Profile Chart")
     fig4 = px.line(terpene_chart_df, x="Analyte", y="Result (% w/w)", title="Terpene Profile", markers=True)
@@ -133,12 +139,4 @@ with tab4:
         "Limit (ug/g)": [110.0, 2.0, 30.0, 0.2, 0.3, 2.0, 0.1, 0.5]
     }
     
-    # Equalize array lengths and remove non-numerical values for plotting
-    metals_chart_data = equalize_array_lengths(metals_data.copy(), numerical_only=True)
-    metals_df = pd.DataFrame(metals_data)
-    metals_chart_df = pd.DataFrame(metals_chart_data)
-
-    # Interactive Line Chart for Metals Data
-    st.write("### Metals Testing Results Chart")
-    fig2 = px.line(metals_chart_df, x="Metal", y="Result (ug/g)", title="Metals Testing Results", markers=True)
-    st.plotly_chart(fig2
+   
