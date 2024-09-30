@@ -80,5 +80,179 @@ with tab2:
 
     # Summary
     st.write("""
+        **Summary**:
+    - Total THC: 29.087% (101.804 mg/serving)
+    - Total CBD: 0.055% (0.192 mg/serving)
+    - Total Cannabinoids: 34.688% (121.414 mg/serving)
+    """)
+
+# Terpene Profile Tab
+with tab3:
+    st.header("Terpene Profile")
+    
+    # Terpene data
+    terpene_data = {
+        "Analyte": ["alpha-Pinene", "Camphene", "Sabinene", "beta-Pinene", "beta-Myrcene", "Alpha-phellandrene", "Carene", "alpha-terpinene", 
+                    "p-Cymene", "Limonene", "Eucalyptol", "Ocimene", "gamma-Terpinene", "Sabinene Hydrate", "Terpinolene", "Linalool", 
+                    "Fenchol", "Menthol", "Terpineol", "Citronellol", "Isopulegol", "Geraniol", "Alpha-cedrene", "Beta-Caryophyllene", 
+                    "Farnesene", "alpha-Humulene", "Valencene", "cis-Nerolidol", "trans-Nerolidol", "Caryophyllene oxide", "Guaiol", 
+                    "alpha-Bisabolol"],
+        "Result (% w/w)": ["< MRL", "< MRL", "< MRL", "0.06", "0.15", "< MRL", "< MRL", "< MRL", "< MRL", "0.43", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", 
+                           "0.21", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "0.06", "0.30", "< MRL", "0.13", "0.24", "< MRL", "< MRL", "< MRL", "< MRL"]
+    }
+    
+    # Equalize array lengths
+    terpene_data = equalize_array_lengths(terpene_data, fill_value="ND")
+    terpene_df = pd.DataFrame(terpene_data)
+    
+    # Interactive Line Chart for Terpenes
+    st.write("### Terpene Profile Chart")
+    fig4 = px.line(terpene_df, x="Analyte", y="Result (% w/w)", title="Terpene Profile", markers=True)
+    st.plotly_chart(fig4)
+
+    # Table for Terpene Data
+    st.write("### Terpene Measurement Table")
+    st.table(terpene_df)
+
+    # Summary
+    st.write("""
     **Summary**:
-    - Total THC: 29.087% (101.804 mg/
+    - Total Terpenes: 1.58% (w/w)
+    - Notable terpenes detected include beta-Myrcene (0.15%), Limonene (0.43%), and Beta-Caryophyllene (0.30%).
+    """)
+
+# Metals Tab
+with tab4:
+    st.header("Metals Testing Results")
+
+    # Metals Data
+    metals_data = {
+        "Metal": ["Chromium", "Nickel", "Copper", "Arsenic", "Cadmium", "Antimony", "Mercury", "Lead"],
+        "Result (ug/g)": ["< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL"],
+        "Limit (ug/g)": [110.0, 2.0, 30.0, 0.2, 0.3, 2.0, 0.1, 0.5]
+    }
+    
+    # Equalize array lengths
+    metals_data = equalize_array_lengths(metals_data, fill_value="< MRL")
+    metals_df = pd.DataFrame(metals_data)
+
+    # Interactive Line Chart for Metals Data
+    st.write("### Metals Testing Results Chart")
+    fig2 = px.line(metals_df, x="Metal", y="Result (ug/g)", title="Metals Testing Results", markers=True)
+    st.plotly_chart(fig2)
+
+    # Table for Metals Data
+    st.write("### Metals Measurement Table")
+    st.table(metals_df)
+
+    # Summary
+    st.write("""
+    **Summary**:
+    - All heavy metals, including lead and mercury, were detected below the minimum reporting limit (MRL) and passed within safe limits.
+    """)
+
+# Pesticides Tab
+with tab5:
+    st.header("Pesticides Testing Results")
+
+    # Pesticides Data
+    pesticides_data = {
+        "Analyte": ["Abamectin", "Acephate", "Acequinocyl", "Acetamiprid", "Aldicarb", "Azadirachtin", "Azoxystrobin"],
+        "Result (ug/g)": ["< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL"],
+        "Limit (ug/g)": [0.50, 0.40, 2.00, 0.20, 0.40, 1.00, 0.20]
+    }
+    
+    # Equalize array lengths
+    pesticides_data = equalize_array_lengths(pesticides_data, fill_value="< MRL")
+    pesticides_df = pd.DataFrame(pesticides_data)
+
+    # Pesticides Testing Chart
+    st.write("### Pesticides Testing Results Chart")
+    fig8 = px.line(pesticides_df, x="Analyte", y="Result (ug/g)", title="Pesticides Testing Results", markers=True)
+    st.plotly_chart(fig8)
+
+    # Table for Pesticides Data
+    st.write("### Pesticides Measurement Table")
+    st.table(pesticides_df)
+
+    # Summary
+    st.write("""
+    **Summary**:
+    - All tested pesticides passed, with no detectable levels above the minimum reporting limit.
+    """)
+
+# Mycotoxins Tab
+with tab6:
+    st.header("Mycotoxins Testing Results")
+
+    # Mycotoxins Data
+    mycotoxins_data = {
+        "Analyte": ["Ochratoxin", "Total Aflatoxins"],
+        "Result (ug/g)": ["< MRL", "< MRL"],
+        "Limit (ug/g)": [0.02, 0.02]
+    }
+    
+    # Equalize array lengths
+    mycotoxins_data = equalize_array_lengths(mycotoxins_data, fill_value="< MRL")
+    mycotoxins_df = pd.DataFrame(mycotoxins_data)
+
+    # Mycotoxins Testing Chart
+    st.write("### Mycotoxins Testing Results Chart")
+    fig9 = px.line(mycotoxins_df, x="Analyte", y="Result (ug/g)", title="Mycotoxins Testing Results", markers=True)
+    st.plotly_chart(fig9)
+
+    # Table for Mycotoxins Data
+    st.write("### Mycotoxins Measurement Table")
+    st.table(mycotoxins_df)
+
+    # Summary
+    st.write("""
+    **Summary**:
+    - The mycotoxins test passed, with no detectable levels of harmful mycotoxins like ochratoxin or aflatoxins.
+    """)
+
+# Microbiological Screen Tab
+with tab7:
+    st.header("Microbiological Screen Results")
+
+    # Microbiological Data
+    microbial_data = {
+        "Analyte": ["Total Aerobic Bacteria", "Total Yeast & Mold", "Salmonella spp", "Shiga toxin-producing E. coli", "Aspergillus"],
+        "Result (CFU/g)": ["< MRL", "< MRL", "Absent", "Absent", "Absent"],
+        "Limit (CFU/g)": ["100000", "10000", "Absent", "Absent", "Absent"]
+    }
+    
+    # Equalize array lengths
+    microbial_data = equalize_array_lengths(microbial_data, fill_value="< MRL")
+    microbial_df = pd.DataFrame(microbial_data)
+
+    # Microbiological Testing Chart
+    st.write("### Microbiological Screen Testing Results Chart")
+    fig10 = px.line(microbial_df, x="Analyte", y="Result (CFU/g)", title="Microbiological Screen Results", markers=True)
+    st.plotly_chart(fig10)
+
+    # Table for Microbiological Data
+    st.write("### Microbiological Measurement Table")
+    st.table(microbial_df)
+
+    # Summary
+    st.write("""
+    **Summary**:
+    - All microbial tests passed, including tests for total aerobic bacteria, yeast, mold, and pathogenic microbes like Salmonella and E. coli.
+    """)
+
+# Moisture & Water Activity Tab
+with tab8:
+    st.header("Moisture & Water Activity Results")
+
+    # Moisture data
+    moisture_data = {
+        "Analyte": ["Moisture", "Water Activity"],
+        "Result": ["10.3%", "0.57"],
+        "Limit": ["15%", "0.65"]
+    }
+    
+    # Equalize array lengths
+    moisture_data = equalize_array_lengths(moisture_data, fill_value="ND")
+    moisture_df = pd.DataFrame(moisture_data)
+
