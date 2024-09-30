@@ -2,16 +2,15 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Function to equalize the lengths of arrays
-def equalize_array_lengths(data_dict, fill_value="ND"):
-    # Find the maximum length among all arrays in the dictionary
+# Function to equalize the lengths of arrays and replace non-numerical values with 0 for charts
+def equalize_array_lengths(data_dict, fill_value="ND", numerical_only=False):
     max_length = max(len(arr) for arr in data_dict.values())
-    
-    # Pad each array to the maximum length with the fill_value
     for key, arr in data_dict.items():
         if len(arr) < max_length:
             data_dict[key] = arr + [fill_value] * (max_length - len(arr))
-    
+        if numerical_only:
+            # Replace non-numerical values with 0 for plotting
+            data_dict[key] = [0 if isinstance(x, str) and not x.replace('.', '', 1).isdigit() else x for x in arr]
     return data_dict
 
 # Add the Green Analytics logo to the header and center it
@@ -58,20 +57,24 @@ with tab1:
 with tab2:
     st.header("Potency and Cannabinoid Analysis")
     
-    # Potency data (unequal arrays will be fixed with equalize_array_lengths)
+    # Potency data
     potency_data = {
         "Analyte": ["CBDV", "CBDA", "CBGA", "CBG", "CBD", "THCV", "CBN", "D9-THC", "D8-THC", "D10-THC-S", "D10-THC-R", "CBC", "THCA"],
         "Percentage (% w/w)": ["< MRL", "0.062", "1.611", "0.104", "< MRL", "< MRL", "< MRL", "1.818", "< MRL", "< MRL", "< MRL", "< MRL", "31.093"],
         "mg/serving": ["< MRL", "0.219", "5.639", "0.366", "< MRL", "< MRL", "< MRL", "6.364", "< MRL", "< MRL", "< MRL", "< MRL", "108.826"]
     }
-    
-    # Equalize array lengths
-    potency_data = equalize_array_lengths(potency_data, fill_value="ND")
+
+    # Equalize array lengths and replace non-numerical values with 0 for plotting
+    potency_chart_data = equalize_array_lengths(potency_data.copy(), numerical_only=True)
     potency_df = pd.DataFrame(potency_data)
+    potency_chart_df = pd.DataFrame(potency_chart_data)
+
+    # Convert chart data to numeric, setting invalid values to 0
+    potency_chart_df["Percentage (% w/w)"] = pd.to_numeric(potency_chart_df["Percentage (% w/w)"], errors='coerce').fillna(0)
 
     # Interactive Line Chart for Potency Results
     st.write("### Potency Analysis Chart")
-    fig = px.line(potency_df, x="Analyte", y="Percentage (% w/w)", title="Potency Analysis", markers=True)
+    fig = px.line(potency_chart_df, x="Analyte", y="Percentage (% w/w)", title="Potency Analysis", markers=True)
     st.plotly_chart(fig)
 
     # Table for Potency Data
@@ -80,7 +83,7 @@ with tab2:
 
     # Summary
     st.write("""
-        **Summary**:
+    **Summary**:
     - Total THC: 29.087% (101.804 mg/serving)
     - Total CBD: 0.055% (0.192 mg/serving)
     - Total Cannabinoids: 34.688% (121.414 mg/serving)
@@ -100,14 +103,18 @@ with tab3:
         "Result (% w/w)": ["< MRL", "< MRL", "< MRL", "0.06", "0.15", "< MRL", "< MRL", "< MRL", "< MRL", "0.43", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", 
                            "0.21", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "0.06", "0.30", "< MRL", "0.13", "0.24", "< MRL", "< MRL", "< MRL", "< MRL"]
     }
-    
-    # Equalize array lengths
-    terpene_data = equalize_array_lengths(terpene_data, fill_value="ND")
+
+    # Equalize array lengths and replace non-numerical values with 0 for plotting
+    terpene_chart_data = equalize_array_lengths(terpene_data.copy(), numerical_only=True)
     terpene_df = pd.DataFrame(terpene_data)
-    
+    terpene_chart_df = pd.DataFrame(terpene_chart_data)
+
+    # Convert chart data to numeric, setting invalid values to 0
+    terpene_chart_df["Result (% w/w)"] = pd.to_numeric(terpene_chart_df["Result (% w/w)"], errors='coerce').fillna(0)
+
     # Interactive Line Chart for Terpenes
     st.write("### Terpene Profile Chart")
-    fig4 = px.line(terpene_df, x="Analyte", y="Result (% w/w)", title="Terpene Profile", markers=True)
+    fig4 = px.line(terpene_chart_df, x="Analyte", y="Result (% w/w)", title="Terpene Profile", markers=True)
     st.plotly_chart(fig4)
 
     # Table for Terpene Data
@@ -131,14 +138,18 @@ with tab4:
         "Result (ug/g)": ["< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL"],
         "Limit (ug/g)": [110.0, 2.0, 30.0, 0.2, 0.3, 2.0, 0.1, 0.5]
     }
-    
-    # Equalize array lengths
-    metals_data = equalize_array_lengths(metals_data, fill_value="< MRL")
+
+       # Equalize array lengths and replace non-numerical values with 0 for plotting
+    metals_chart_data = equalize_array_lengths(metals_data.copy(), numerical_only=True)
     metals_df = pd.DataFrame(metals_data)
+    metals_chart_df = pd.DataFrame(metals_chart_data)
+
+    # Convert chart data to numeric, setting invalid values to 0
+    metals_chart_df["Result (ug/g)"] = pd.to_numeric(metals_chart_df["Result (ug/g)"], errors='coerce').fillna(0)
 
     # Interactive Line Chart for Metals Data
     st.write("### Metals Testing Results Chart")
-    fig2 = px.line(metals_df, x="Metal", y="Result (ug/g)", title="Metals Testing Results", markers=True)
+    fig2 = px.line(metals_chart_df, x="Metal", y="Result (ug/g)", title="Metals Testing Results", markers=True)
     st.plotly_chart(fig2)
 
     # Table for Metals Data
@@ -161,14 +172,18 @@ with tab5:
         "Result (ug/g)": ["< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL"],
         "Limit (ug/g)": [0.50, 0.40, 2.00, 0.20, 0.40, 1.00, 0.20]
     }
-    
-    # Equalize array lengths
-    pesticides_data = equalize_array_lengths(pesticides_data, fill_value="< MRL")
+
+    # Equalize array lengths and replace non-numerical values with 0 for plotting
+    pesticides_chart_data = equalize_array_lengths(pesticides_data.copy(), numerical_only=True)
     pesticides_df = pd.DataFrame(pesticides_data)
+    pesticides_chart_df = pd.DataFrame(pesticides_chart_data)
+
+    # Convert chart data to numeric, setting invalid values to 0
+    pesticides_chart_df["Result (ug/g)"] = pd.to_numeric(pesticides_chart_df["Result (ug/g)"], errors='coerce').fillna(0)
 
     # Pesticides Testing Chart
     st.write("### Pesticides Testing Results Chart")
-    fig8 = px.line(pesticides_df, x="Analyte", y="Result (ug/g)", title="Pesticides Testing Results", markers=True)
+    fig8 = px.line(pesticides_chart_df, x="Analyte", y="Result (ug/g)", title="Pesticides Testing Results", markers=True)
     st.plotly_chart(fig8)
 
     # Table for Pesticides Data
@@ -191,14 +206,18 @@ with tab6:
         "Result (ug/g)": ["< MRL", "< MRL"],
         "Limit (ug/g)": [0.02, 0.02]
     }
-    
-    # Equalize array lengths
-    mycotoxins_data = equalize_array_lengths(mycotoxins_data, fill_value="< MRL")
+
+    # Equalize array lengths and replace non-numerical values with 0 for plotting
+    mycotoxins_chart_data = equalize_array_lengths(mycotoxins_data.copy(), numerical_only=True)
     mycotoxins_df = pd.DataFrame(mycotoxins_data)
+    mycotoxins_chart_df = pd.DataFrame(mycotoxins_chart_data)
+
+    # Convert chart data to numeric, setting invalid values to 0
+    mycotoxins_chart_df["Result (ug/g)"] = pd.to_numeric(mycotoxins_chart_df["Result (ug/g)"], errors='coerce').fillna(0)
 
     # Mycotoxins Testing Chart
     st.write("### Mycotoxins Testing Results Chart")
-    fig9 = px.line(mycotoxins_df, x="Analyte", y="Result (ug/g)", title="Mycotoxins Testing Results", markers=True)
+    fig9 = px.line(mycotoxins_chart_df, x="Analyte", y="Result (ug/g)", title="Mycotoxins Testing Results", markers=True)
     st.plotly_chart(fig9)
 
     # Table for Mycotoxins Data
@@ -221,14 +240,18 @@ with tab7:
         "Result (CFU/g)": ["< MRL", "< MRL", "Absent", "Absent", "Absent"],
         "Limit (CFU/g)": ["100000", "10000", "Absent", "Absent", "Absent"]
     }
-    
-    # Equalize array lengths
-    microbial_data = equalize_array_lengths(microbial_data, fill_value="< MRL")
+
+    # Equalize array lengths and replace non-numerical values with 0 for plotting
+    microbial_chart_data = equalize_array_lengths(microbial_data.copy(), numerical_only=True)
     microbial_df = pd.DataFrame(microbial_data)
+    microbial_chart_df = pd.DataFrame(microbial_chart_data)
+
+    # Convert chart data to numeric, setting invalid values to 0
+    microbial_chart_df["Result (CFU/g)"] = pd.to_numeric(microbial_chart_df["Result (CFU/g)"], errors='coerce').fillna(0)
 
     # Microbiological Testing Chart
     st.write("### Microbiological Screen Testing Results Chart")
-    fig10 = px.line(microbial_df, x="Analyte", y="Result (CFU/g)", title="Microbiological Screen Results", markers=True)
+    fig10 = px.line(microbial_chart_df, x="Analyte", y="Result (CFU/g)", title="Microbiological Screen Results", markers=True)
     st.plotly_chart(fig10)
 
     # Table for Microbiological Data
@@ -251,14 +274,18 @@ with tab8:
         "Result": ["10.3%", "0.57"],
         "Limit": ["15%", "0.65"]
     }
-    
-    # Equalize array lengths
-    moisture_data = equalize_array_lengths(moisture_data, fill_value="ND")
+
+    # Equalize array lengths and replace non-numerical values with 0 for plotting
+    moisture_chart_data = equalize_array_lengths(moisture_data.copy(), numerical_only=True)
     moisture_df = pd.DataFrame(moisture_data)
+    moisture_chart_df = pd.DataFrame(moisture_chart_data)
+
+    # Convert chart data to numeric, removing percentage symbol and invalid values to 0
+    moisture_chart_df["Result"] = pd.to_numeric(moisture_chart_df["Result"].str.replace('%', ''), errors='coerce').fillna(0)
 
     # Moisture & Water Activity Chart
     st.write("### Moisture & Water Activity Results Chart")
-    fig11 = px.line(moisture_df, x="Analyte", y="Result", title="Moisture & Water Activity Results", markers=True)
+    fig11 = px.line(moisture_chart_df, x="Analyte", y="Result", title="Moisture & Water Activity Results", markers=True)
     st.plotly_chart(fig11)
 
     # Table for Moisture & Water Activity Data
@@ -281,14 +308,15 @@ with tab9:
         "Result": ["ND", "ND", "ND"],
         "Limit": ["2%", "5%", "1 mg/lb"]
     }
-    
-    # Equalize array lengths
-    filth_data = equalize_array_lengths(filth_data, fill_value="ND")
+
+    # Equalize array lengths and replace non-numerical values with 0 for plotting
+    filth_chart_data = equalize_array_lengths(filth_data.copy(), numerical_only=True)
     filth_df = pd.DataFrame(filth_data)
+    filth_chart_df = pd.DataFrame(filth_chart_data)
 
     # Filth & Foreign Material Chart
     st.write("### Filth & Foreign Material Results Chart")
-    fig12 = px.line(filth_df, x="Analyte", y="Result", title="Filth & Foreign Material Results", markers=True)
+    fig12 = px.line(filth_chart_df, x="Analyte", y="Result", title="Filth & Foreign Material Results", markers=True)
     st.plotly_chart(fig12)
 
     # Table for Filth & Foreign Material Data
