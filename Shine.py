@@ -2,16 +2,15 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Function to equalize the lengths of arrays
-def equalize_array_lengths(data_dict, fill_value="ND"):
-    # Find the maximum length among all arrays in the dictionary
+# Function to equalize the lengths of arrays and replace non-numerical values with None for charts
+def equalize_array_lengths(data_dict, fill_value="ND", numerical_only=False):
     max_length = max(len(arr) for arr in data_dict.values())
-    
-    # Pad each array to the maximum length with the fill_value
     for key, arr in data_dict.items():
         if len(arr) < max_length:
             data_dict[key] = arr + [fill_value] * (max_length - len(arr))
-    
+        if numerical_only:
+            # Replace non-numerical values with None for plotting
+            data_dict[key] = [None if isinstance(x, str) and not x.replace('.', '', 1).isdigit() else x for x in arr]
     return data_dict
 
 # Add the Green Analytics logo to the header and center it
@@ -58,20 +57,21 @@ with tab1:
 with tab2:
     st.header("Potency and Cannabinoid Analysis")
     
-    # Potency data (unequal arrays will be fixed with equalize_array_lengths)
+    # Potency data
     potency_data = {
         "Analyte": ["CBDV", "CBDA", "CBGA", "CBG", "CBD", "THCV", "CBN", "D9-THC", "D8-THC", "D10-THC-S", "D10-THC-R", "CBC", "THCA"],
         "Percentage (% w/w)": ["< MRL", "0.062", "1.611", "0.104", "< MRL", "< MRL", "< MRL", "1.818", "< MRL", "< MRL", "< MRL", "< MRL", "31.093"],
         "mg/serving": ["< MRL", "0.219", "5.639", "0.366", "< MRL", "< MRL", "< MRL", "6.364", "< MRL", "< MRL", "< MRL", "< MRL", "108.826"]
     }
-    
-    # Equalize array lengths
-    potency_data = equalize_array_lengths(potency_data, fill_value="ND")
+
+    # Equalize array lengths and remove non-numerical values for plotting
+    potency_chart_data = equalize_array_lengths(potency_data.copy(), numerical_only=True)
     potency_df = pd.DataFrame(potency_data)
+    potency_chart_df = pd.DataFrame(potency_chart_data)
 
     # Interactive Line Chart for Potency Results
     st.write("### Potency Analysis Chart")
-    fig = px.line(potency_df, x="Analyte", y="Percentage (% w/w)", title="Potency Analysis", markers=True)
+    fig = px.line(potency_chart_df, x="Analyte", y="Percentage (% w/w)", title="Potency Analysis", markers=True)
     st.plotly_chart(fig)
 
     # Table for Potency Data
@@ -80,7 +80,7 @@ with tab2:
 
     # Summary
     st.write("""
-        **Summary**:
+    **Summary**:
     - Total THC: 29.087% (101.804 mg/serving)
     - Total CBD: 0.055% (0.192 mg/serving)
     - Total Cannabinoids: 34.688% (121.414 mg/serving)
@@ -100,14 +100,15 @@ with tab3:
         "Result (% w/w)": ["< MRL", "< MRL", "< MRL", "0.06", "0.15", "< MRL", "< MRL", "< MRL", "< MRL", "0.43", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", 
                            "0.21", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "0.06", "0.30", "< MRL", "0.13", "0.24", "< MRL", "< MRL", "< MRL", "< MRL"]
     }
-    
-    # Equalize array lengths
-    terpene_data = equalize_array_lengths(terpene_data, fill_value="ND")
+
+    # Equalize array lengths and remove non-numerical values for plotting
+    terpene_chart_data = equalize_array_lengths(terpene_data.copy(), numerical_only=True)
     terpene_df = pd.DataFrame(terpene_data)
-    
+    terpene_chart_df = pd.DataFrame(terpene_chart_data)
+
     # Interactive Line Chart for Terpenes
     st.write("### Terpene Profile Chart")
-    fig4 = px.line(terpene_df, x="Analyte", y="Result (% w/w)", title="Terpene Profile", markers=True)
+    fig4 = px.line(terpene_chart_df, x="Analyte", y="Result (% w/w)", title="Terpene Profile", markers=True)
     st.plotly_chart(fig4)
 
     # Table for Terpene Data
@@ -132,127 +133,12 @@ with tab4:
         "Limit (ug/g)": [110.0, 2.0, 30.0, 0.2, 0.3, 2.0, 0.1, 0.5]
     }
     
-    # Equalize array lengths
-    metals_data = equalize_array_lengths(metals_data, fill_value="< MRL")
+    # Equalize array lengths and remove non-numerical values for plotting
+    metals_chart_data = equalize_array_lengths(metals_data.copy(), numerical_only=True)
     metals_df = pd.DataFrame(metals_data)
+    metals_chart_df = pd.DataFrame(metals_chart_data)
 
     # Interactive Line Chart for Metals Data
     st.write("### Metals Testing Results Chart")
-    fig2 = px.line(metals_df, x="Metal", y="Result (ug/g)", title="Metals Testing Results", markers=True)
-    st.plotly_chart(fig2)
-
-    # Table for Metals Data
-    st.write("### Metals Measurement Table")
-    st.table(metals_df)
-
-    # Summary
-    st.write("""
-    **Summary**:
-    - All heavy metals, including lead and mercury, were detected below the minimum reporting limit (MRL) and passed within safe limits.
-    """)
-
-# Pesticides Tab
-with tab5:
-    st.header("Pesticides Testing Results")
-
-    # Pesticides Data
-    pesticides_data = {
-        "Analyte": ["Abamectin", "Acephate", "Acequinocyl", "Acetamiprid", "Aldicarb", "Azadirachtin", "Azoxystrobin"],
-        "Result (ug/g)": ["< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL", "< MRL"],
-        "Limit (ug/g)": [0.50, 0.40, 2.00, 0.20, 0.40, 1.00, 0.20]
-    }
-    
-    # Equalize array lengths
-    pesticides_data = equalize_array_lengths(pesticides_data, fill_value="< MRL")
-    pesticides_df = pd.DataFrame(pesticides_data)
-
-    # Pesticides Testing Chart
-    st.write("### Pesticides Testing Results Chart")
-    fig8 = px.line(pesticides_df, x="Analyte", y="Result (ug/g)", title="Pesticides Testing Results", markers=True)
-    st.plotly_chart(fig8)
-
-    # Table for Pesticides Data
-    st.write("### Pesticides Measurement Table")
-    st.table(pesticides_df)
-
-    # Summary
-    st.write("""
-    **Summary**:
-    - All tested pesticides passed, with no detectable levels above the minimum reporting limit.
-    """)
-
-# Mycotoxins Tab
-with tab6:
-    st.header("Mycotoxins Testing Results")
-
-    # Mycotoxins Data
-    mycotoxins_data = {
-        "Analyte": ["Ochratoxin", "Total Aflatoxins"],
-        "Result (ug/g)": ["< MRL", "< MRL"],
-        "Limit (ug/g)": [0.02, 0.02]
-    }
-    
-    # Equalize array lengths
-    mycotoxins_data = equalize_array_lengths(mycotoxins_data, fill_value="< MRL")
-    mycotoxins_df = pd.DataFrame(mycotoxins_data)
-
-    # Mycotoxins Testing Chart
-    st.write("### Mycotoxins Testing Results Chart")
-    fig9 = px.line(mycotoxins_df, x="Analyte", y="Result (ug/g)", title="Mycotoxins Testing Results", markers=True)
-    st.plotly_chart(fig9)
-
-    # Table for Mycotoxins Data
-    st.write("### Mycotoxins Measurement Table")
-    st.table(mycotoxins_df)
-
-    # Summary
-    st.write("""
-    **Summary**:
-    - The mycotoxins test passed, with no detectable levels of harmful mycotoxins like ochratoxin or aflatoxins.
-    """)
-
-# Microbiological Screen Tab
-with tab7:
-    st.header("Microbiological Screen Results")
-
-    # Microbiological Data
-    microbial_data = {
-        "Analyte": ["Total Aerobic Bacteria", "Total Yeast & Mold", "Salmonella spp", "Shiga toxin-producing E. coli", "Aspergillus"],
-        "Result (CFU/g)": ["< MRL", "< MRL", "Absent", "Absent", "Absent"],
-        "Limit (CFU/g)": ["100000", "10000", "Absent", "Absent", "Absent"]
-    }
-    
-    # Equalize array lengths
-    microbial_data = equalize_array_lengths(microbial_data, fill_value="< MRL")
-    microbial_df = pd.DataFrame(microbial_data)
-
-    # Microbiological Testing Chart
-    st.write("### Microbiological Screen Testing Results Chart")
-    fig10 = px.line(microbial_df, x="Analyte", y="Result (CFU/g)", title="Microbiological Screen Results", markers=True)
-    st.plotly_chart(fig10)
-
-    # Table for Microbiological Data
-    st.write("### Microbiological Measurement Table")
-    st.table(microbial_df)
-
-    # Summary
-    st.write("""
-    **Summary**:
-    - All microbial tests passed, including tests for total aerobic bacteria, yeast, mold, and pathogenic microbes like Salmonella and E. coli.
-    """)
-
-# Moisture & Water Activity Tab
-with tab8:
-    st.header("Moisture & Water Activity Results")
-
-    # Moisture data
-    moisture_data = {
-        "Analyte": ["Moisture", "Water Activity"],
-        "Result": ["10.3%", "0.57"],
-        "Limit": ["15%", "0.65"]
-    }
-    
-    # Equalize array lengths
-    moisture_data = equalize_array_lengths(moisture_data, fill_value="ND")
-    moisture_df = pd.DataFrame(moisture_data)
-
+    fig2 = px.line(metals_chart_df, x="Metal", y="Result (ug/g)", title="Metals Testing Results", markers=True)
+    st.plotly_chart(fig2
