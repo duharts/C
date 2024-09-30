@@ -2,6 +2,35 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+def equalize_array_lengths(data_dict, fill_value=None):
+    # Find the maximum length among all arrays in the dictionary
+    max_length = max(len(arr) for arr in data_dict.values())
+    
+    # Pad each array to the maximum length with the fill_value
+    for key, arr in data_dict.items():
+        if len(arr) < max_length:
+            # Extend the array with the fill_value
+            data_dict[key] = arr + [fill_value] * (max_length - len(arr))
+    
+    return data_dict
+
+# Example usage
+data_dict = {
+    "Analyte": ["CBDV", "CBDA", "CBGA", "CBG", "CBD"],
+    "Percentage (% w/w)": ["< MRL", "0.062", "1.611"],
+    "mg/serving": ["< MRL", "0.219", "5.639", "0.366"]
+}
+
+# Make all arrays the same length, padding with "ND" (Not Detected)
+equalized_data = equalize_array_lengths(data_dict, fill_value="ND")
+
+# Create a DataFrame from the equalized data
+df = pd.DataFrame(equalized_data)
+
+# Print the DataFrame
+print(df)
+
+
 # Add the Green Analytics logo to the header and center it
 logo_url = "https://www.greenanalyticsllc.com/logo.png"
 st.markdown(
